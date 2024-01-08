@@ -1,13 +1,11 @@
-package xyz.suhyuk0544.springwebsocket.Configuration;
+package xyz.suhyuk0544.springwebsocket.WebSocket.Configuration;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import xyz.suhyuk0544.springwebsocket.Handlers.CustomWeSocketHandler;
-import xyz.suhyuk0544.springwebsocket.Service.MessageServiceImpl;
+import xyz.suhyuk0544.springwebsocket.WebSocket.Handlers.CustomWeSocketHandler;
 
 @Configuration
 @EnableWebSocket
@@ -18,7 +16,7 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(customWeSocketHandler)
+        registry.addHandler(customWeSocketHandler,"/chat")
                 .setAllowedOrigins("*");
     }
 
