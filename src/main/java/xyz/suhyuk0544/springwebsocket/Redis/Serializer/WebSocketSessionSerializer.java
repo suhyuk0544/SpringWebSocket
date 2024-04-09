@@ -1,4 +1,4 @@
-package xyz.suhyuk0544.springwebsocket.WebSocket.Redis.Serializer;
+package xyz.suhyuk0544.springwebsocket.Redis.Serializer;
 
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;

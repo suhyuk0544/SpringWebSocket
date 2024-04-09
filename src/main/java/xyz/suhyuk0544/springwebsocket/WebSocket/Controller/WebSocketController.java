@@ -8,12 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import xyz.suhyuk0544.springwebsocket.WebSocket.Redis.Room;
-import xyz.suhyuk0544.springwebsocket.WebSocket.Redis.RoomRepository;
-import xyz.suhyuk0544.springwebsocket.WebSocket.Room.WebSocketRoom;
+import xyz.suhyuk0544.springwebsocket.Redis.Room;
+import xyz.suhyuk0544.springwebsocket.Redis.RoomRepository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j

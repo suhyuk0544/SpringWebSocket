@@ -1,7 +1,6 @@
 package xyz.suhyuk0544.springwebsocket.WebSocket.Handlers;
 
 import jakarta.websocket.Session;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,15 +11,13 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import xyz.suhyuk0544.springwebsocket.WebSocket.Redis.CustomWebSocketSession;
-import xyz.suhyuk0544.springwebsocket.WebSocket.Redis.Room;
-import xyz.suhyuk0544.springwebsocket.WebSocket.Redis.RoomRepository;
+import xyz.suhyuk0544.springwebsocket.Redis.Room;
+import xyz.suhyuk0544.springwebsocket.Redis.RoomRepository;
 import xyz.suhyuk0544.springwebsocket.WebSocket.Service.MessageService;
 import xyz.suhyuk0544.springwebsocket.WebSocket.Service.MessageServiceImpl;
 
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Scanner;
 
 @Slf4j
 @Component

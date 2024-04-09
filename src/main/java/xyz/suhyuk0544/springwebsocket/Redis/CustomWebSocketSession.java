@@ -1,4 +1,4 @@
-package xyz.suhyuk0544.springwebsocket.WebSocket.Redis;
+package xyz.suhyuk0544.springwebsocket.Redis;
 
 
 import jakarta.websocket.Session;

@@ -1,10 +1,8 @@
-package xyz.suhyuk0544.springwebsocket.WebSocket.Redis;
+package xyz.suhyuk0544.springwebsocket.Redis;
 
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 @EnableRedisRepositories

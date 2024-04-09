@@ -1,4 +1,4 @@
-package xyz.suhyuk0544.springwebsocket.WebSocket.Redis;
+package xyz.suhyuk0544.springwebsocket.Redis;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -9,7 +9,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
-import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
