@@ -1,26 +1,39 @@
 package xyz.suhyuk0544.springwebsocket.WebSocket.Service;
 
+import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import xyz.suhyuk0544.springwebsocket.Redis.RedisPublisher;
+import xyz.suhyuk0544.springwebsocket.Redis.Room.RoomRepository;
 
-import java.io.IOException;
+import java.util.Objects;
 
-import static xyz.suhyuk0544.springwebsocket.WebSocket.Handlers.CustomWebSocketHandler.sessions;
 
 @Service
+@RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
 
-    public void sendAllMemberMessage(WebSocketSession session, TextMessage message) {
+    private final RedisPublisher redisPublisher;
 
-        sessions.values().forEach(s -> {
-            if (!session.getId().equals(s.getId())) {
-                try {
-                    s.sendMessage(new TextMessage(session.getPrincipal().getName() + ":" + message.getPayload()));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+    private final RoomRepository roomRepository;
+
+
+    @Override
+    public void sendMessage(WebSocketSession session,String id,String message) {
+
+//         redisPublisher.publish(roomRepository.getTopic(message),
+//                 Objects.requireNonNull(session.getPrincipal()).getName() + message);
+
+
+//        sessions.values().forEach(s -> {
+//            if (!session.getId().equals(s.getId())) {
+//                try {
+//                    s.sendMessage(new TextMessage(session.getPrincipal().getName() + ":" + message.getPayload()));
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        });
     }
 }

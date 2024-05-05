@@ -26,8 +26,9 @@ dependencies {
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'org.json:json:20240303'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-
+    implementation group: 'org.webjars', name: 'stomp-websocket', version: '2.3.3-1'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

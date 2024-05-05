@@ -21,7 +21,6 @@ import java.io.IOException;
 @Slf4j
 public class ApiLoginAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter {
 
-
     protected ApiLoginAuthenticationProcessingFilter(String defaultFilterProcessesUrl) {
         super(defaultFilterProcessesUrl);
     }
@@ -46,6 +45,7 @@ public class ApiLoginAuthenticationProcessingFilter extends AbstractAuthenticati
         log.info("login : {}",jsonObject.getString("email"));
 
         super.successfulAuthentication(request, response, chain, authResult);
+
     }
 
 //    @Override
@@ -71,14 +71,14 @@ public class ApiLoginAuthenticationProcessingFilter extends AbstractAuthenticati
         String password = jsonObject.getString("password");
         password = (password != null) ? password : "";
 
+
+
         return this.getAuthenticationManager().authenticate(UsernamePasswordAuthenticationToken.unauthenticated(email,password));
     }
 
 
     private JSONObject makeJSONObject(HttpServletRequest request) throws AuthenticationException, IOException {
-
         return new JSONObject(new JSONTokener(request.getReader()));
-
     }
 
 

@@ -19,17 +19,20 @@ import java.util.Collection;
 @Builder
 public class UserInfo implements UserDetails {
 
-
     @Id
     @Column
     private String email;
 
     @Column
     private String password;
+
+//    private String
+
     public UserInfo(String email, String password) {
         this.email = email;
         this.password = password;
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,5 +1,7 @@
 package xyz.suhyuk0544.springwebsocket;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -17,6 +19,11 @@ public class SpringWebSocketApplication {
 
 
 //    public static void main(String[] args) {
-//        Scanner input = new Scanner(Syst
+//        for (int j = 1; j < 10; j++) {
+//            for (int k = 1; k < 10; k++) {
+//                System.out.println(j + "*" + k + "=" + j*k);
+//            }
+//        }
 //    }
+
 }

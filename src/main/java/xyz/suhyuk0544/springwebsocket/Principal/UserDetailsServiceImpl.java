@@ -12,6 +12,10 @@ import xyz.suhyuk0544.springwebsocket.Principal.User.UserInfo;
 import xyz.suhyuk0544.springwebsocket.Principal.User.UserInfoDto;
 import xyz.suhyuk0544.springwebsocket.Principal.User.UserInfoRepository;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -41,7 +45,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     }
 
+    public UserInfo selectUserInfo(ArrayList<Principal> userInfos) {
+        if (userInfos.size() < 2)
+            return null;
 
-
+        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
+        return (UserInfo) userInfos.get(threadLocalRandom.nextInt(userInfos.size()-1));
+    }
 
 }

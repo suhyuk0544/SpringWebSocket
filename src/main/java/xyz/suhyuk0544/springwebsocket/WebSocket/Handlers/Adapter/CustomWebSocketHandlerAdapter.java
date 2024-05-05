@@ -1,27 +1,33 @@
 package xyz.suhyuk0544.springwebsocket.WebSocket.Handlers.Adapter;
 
-import jakarta.websocket.CloseReason;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.EndpointConfig;
-import jakarta.websocket.MessageHandler;
+import jakarta.websocket.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.*;
-import org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerAdapter;
+import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
+import org.springframework.web.socket.adapter.standard.WebSocketToStandardExtensionAdapter;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
+import xyz.suhyuk0544.springwebsocket.Redis.Room.RoomService;
+import xyz.suhyuk0544.springwebsocket.WebSocket.Session.CustomWebSocketSession;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
+@Slf4j
 public class CustomWebSocketHandlerAdapter extends Endpoint {
 
-    private final Log logger = LogFactory.getLog(StandardWebSocketHandlerAdapter.class);
+    private final Log logger = LogFactory.getLog(CustomWebSocketHandlerAdapter.class);
 
     private final WebSocketHandler handler;
 
     private final StandardWebSocketSession wsSession;
-
 
     public CustomWebSocketHandlerAdapter(WebSocketHandler handler, StandardWebSocketSession wsSession) {
         Assert.notNull(handler, "WebSocketHandler must not be null");
@@ -30,13 +36,9 @@ public class CustomWebSocketHandlerAdapter extends Endpoint {
         this.wsSession = wsSession;
     }
 
-
     @Override
-    public void onOpen(final jakarta.websocket.Session session, EndpointConfig config) {
+    public void onOpen(final Session session, EndpointConfig config) {
         this.wsSession.initializeNativeSession(session);
-
-        // The following inner classes need to remain since lambdas would not retain their
-        // declared generic types (which need to be seen by the underlying WebSocket engine)
 
         if (this.handler.supportsPartialMessages()) {
             session.addMessageHandler(new MessageHandler.Partial<String>() {
@@ -66,15 +68,14 @@ public class CustomWebSocketHandlerAdapter extends Endpoint {
                 }
             });
         }
-
         session.addMessageHandler(new MessageHandler.Whole<jakarta.websocket.PongMessage>() {
             @Override
             public void onMessage(jakarta.websocket.PongMessage message) {
                 handlePongMessage(session, message.getApplicationData());
             }
         });
-
         try {
+//            roomService.findRoomById(session.getPathParameters().get("roomId"));
             this.handler.afterConnectionEstablished(this.wsSession);
         }
         catch (Exception ex) {
@@ -82,8 +83,9 @@ public class CustomWebSocketHandlerAdapter extends Endpoint {
         }
     }
 
-    private void handleTextMessage(jakarta.websocket.Session session, String payload, boolean isLast) {
+    private void handleTextMessage(Session session, String payload, boolean isLast) {
         TextMessage textMessage = new TextMessage(payload, isLast);
+
         try {
             this.handler.handleMessage(this.wsSession, textMessage);
         }
@@ -92,7 +94,7 @@ public class CustomWebSocketHandlerAdapter extends Endpoint {
         }
     }
 
-    private void handleBinaryMessage(jakarta.websocket.Session session, ByteBuffer payload, boolean isLast) {
+    private void handleBinaryMessage(Session session, ByteBuffer payload, boolean isLast) {
         BinaryMessage binaryMessage = new BinaryMessage(payload, isLast);
         try {
             this.handler.handleMessage(this.wsSession, binaryMessage);
@@ -102,7 +104,7 @@ public class CustomWebSocketHandlerAdapter extends Endpoint {
         }
     }
 
-    private void handlePongMessage(jakarta.websocket.Session session, ByteBuffer payload) {
+    private void handlePongMessage(Session session, ByteBuffer payload) {
         PongMessage pongMessage = new PongMessage(payload);
         try {
             this.handler.handleMessage(this.wsSession, pongMessage);
@@ -113,7 +115,7 @@ public class CustomWebSocketHandlerAdapter extends Endpoint {
     }
 
     @Override
-    public void onClose(jakarta.websocket.Session session, CloseReason reason) {
+    public void onClose(Session session, CloseReason reason) {
         CloseStatus closeStatus = new CloseStatus(reason.getCloseCode().getCode(), reason.getReasonPhrase());
         try {
             this.handler.afterConnectionClosed(this.wsSession, closeStatus);
@@ -126,7 +128,7 @@ public class CustomWebSocketHandlerAdapter extends Endpoint {
     }
 
     @Override
-    public void onError(jakarta.websocket.Session session, Throwable exception) {
+    public void onError(Session session, Throwable exception) {
         try {
             this.handler.handleTransportError(this.wsSession, exception);
         }

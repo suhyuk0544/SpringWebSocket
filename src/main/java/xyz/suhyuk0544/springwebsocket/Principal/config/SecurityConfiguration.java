@@ -56,9 +56,9 @@ public class SecurityConfiguration {
                         this.abstractAuthenticationProcessingFilter(authenticationManager)
                         , UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .logout(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
-
 
         return http.build();
     }

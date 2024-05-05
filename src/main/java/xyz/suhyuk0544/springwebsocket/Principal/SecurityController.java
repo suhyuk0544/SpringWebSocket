@@ -27,16 +27,10 @@ public class SecurityController {
     private final UserDetailsServiceImpl userDetailsService;
 
     @PostMapping(value = "/save",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> saveUserInfo(@RequestBody Map<String,Object> json){
-
-        JSONObject jsonObject = new JSONObject(json);
-
-        log.info("{}",jsonObject);
-
-        userDetailsService.saveUserInfo(new UserInfoDto(jsonObject.getString("email"), jsonObject.getString("password")));
-
-        return new ResponseEntity<>(HttpStatus.OK);
-
+    public ResponseEntity<String> saveUserInfo(@RequestBody UserInfoDto userInfoDto){
+//        JSONObject jsonObject = new JSONObject(json);
+        userDetailsService.saveUserInfo(userInfoDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 

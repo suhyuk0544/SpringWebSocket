@@ -1,97 +1,159 @@
 package xyz.suhyuk0544.springwebsocket.WebSocket.Handlers;
 
 import jakarta.websocket.Session;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+//import org.springframework.web.socket.WebSocketSession;
+//import xyz.suhyuk0544.springwebsocket.Redis.Room.RoomRepository;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-//import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import xyz.suhyuk0544.springwebsocket.Redis.Room;
-import xyz.suhyuk0544.springwebsocket.Redis.RoomRepository;
+import xyz.suhyuk0544.springwebsocket.Redis.RedisPublisher;
+import xyz.suhyuk0544.springwebsocket.Redis.Room.Room;
+import xyz.suhyuk0544.springwebsocket.Redis.Room.RoomRepository;
+import xyz.suhyuk0544.springwebsocket.Redis.Room.RoomService;
+import xyz.suhyuk0544.springwebsocket.WebSocket.Dto.MessageDTO;
 import xyz.suhyuk0544.springwebsocket.WebSocket.Service.MessageService;
 import xyz.suhyuk0544.springwebsocket.WebSocket.Service.MessageServiceImpl;
+import xyz.suhyuk0544.springwebsocket.WebSocket.Session.CustomWebSocketSession;
 
-import java.util.HashMap;
+import java.security.Principal;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
-@Component
-public class CustomWebSocketHandler extends TextWebSocketHandler {
+@RestController
+@RequiredArgsConstructor
+public class CustomWebSocketHandler {
 
-    public static final HashMap<String,WebSocketSession> sessions = new HashMap<>();
 
     private final MessageServiceImpl messageService;
 
+//    private final RedisPublisher redisPublisher;
     private final RoomRepository roomRepository;
+    private final RedisPublisher redisPublisher;
+    private final RoomService roomService;
 
     @Autowired
-    public CustomWebSocketHandler(@Qualifier("messageServiceImpl") MessageService messageService, RoomRepository roomRepository){
+    public CustomWebSocketHandler(@Qualifier("messageServiceImpl") MessageService messageService, RoomRepository roomRepository, RedisPublisher redisPublisher, RoomService roomService){
         this.messageService = (MessageServiceImpl) messageService;
-
         this.roomRepository = roomRepository;
+        this.redisPublisher = redisPublisher;
+        this.roomService = roomService;
     }
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+//    @Override
+//    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+//
+//        String roomId = Objects.requireNonNull(session.getHandshakeHeaders().get("roomId")).get(0);
+//
+//        log.info(session.getAttributes().toString());
+//        log.info(session.toString());
+//        log.info(roomId);
+//
+//        roomRepository.createChatRoom(roomId);
+//        roomRepository.enterChatRoom(roomId);
+//        log.info("room = {}",roomRepository.findRoomById(roomId).toString());
+//
+//        MessageDTO messageDTO = new MessageDTO();
+//        messageDTO.setRoomId(roomId);
+//        messageDTO.setMessage(session.getPrincipal().getName() + "님이 들어왔습니다");
+//        messageService.sendMessage();
 
-//        StandardWebSocketSession standardWebSocketSession = session;
-        String roomName = Objects.requireNonNull(session.getHandshakeHeaders().get("RoomName")).toString();
+//        messageService.sendMessage(session,roomId,"님이 들어왔습니다");
+//        redisPublisher.publish(roomRepository.getTopic(roomId),
+//                 messageDTO);
 
-        String userName = Objects.requireNonNull(session.getPrincipal()).getName();
-        log.info(session.getAttributes().toString());
-        log.info(session.toString());
-        log.info(session.getExtensions().toString());
+//        super.afterConnectionEstablished(session);
+//    }
 
-        StandardWebSocketSession standardWebSocketSession = (StandardWebSocketSession) session;
+//    @Override
+//    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+//
+//        JSONObject jsonObject = new JSONObject(message.getPayload());
+//
+//
+//        WebSocketSession socketSession = sessions.get(session.getId());
+//        log.info(session.toString());
+//        log.info(session.getExtensions().toString());
+//
 
-        log.info(standardWebSocketSession.getId());
+//        if (socketSession != null && socketSession.isOpen())
+//            messageService.sendAllMemberMessage(session,message);
 
-        Session session1 = (Session) standardWebSocketSession;
+//    }
 
-        log.info(session1.toString());
+//    @Override
+//    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+//
+//        sessions.remove(session.getId());
+//
+//        messageService.sendAllMemberMessage(session,new TextMessage("out"));
 
-        //따로 서비스 계층으로 옮기기
-        roomRepository.findByName(roomName).ifPresentOrElse(room ->
-                room.getAuthId()
-        ,() -> roomRepository.save(
-             Room.builder()
-                     .name(roomName)
-                     .ttl(86400)
-//                     .session((CustomWebSocketSession) standardWebSocketSession)
-                        .build()));
+//        super.afterConnectionClosed(session, status);
+//    }
 
-        sessions.put(session.getId(),session);
-
-        messageService.sendAllMemberMessage(session,new TextMessage("join"));
-
-        super.afterConnectionEstablished(session);
+    @MessageMapping(value = "/chat/message/{roomId}")
+    public void message(MessageDTO message,@DestinationVariable String roomId,@AuthenticationPrincipal Principal principal) {
+        message.setMessage(principal.getName() + ":" + message.getMessage());
+//        roomRepository.enterChatRoom(roomId);
+        redisPublisher.publish(roomRepository.getTopic(roomId), message);
     }
 
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    @MessageMapping(value = "/chat/create")
+    public void enter(MessageDTO message,@AuthenticationPrincipal Principal principal){
+        message.setMessage(principal.getName() +"님이 채팅방에 참여하였습니다.");
+        String roomId = message.getRoomId();
 
-        WebSocketSession socketSession = sessions.get(session.getId());
-        log.info(session.toString());
-        log.info(session.getExtensions().toString());
+        roomRepository.createChatRoom(roomId);
 
+        roomRepository.enterChatRoom(roomId);
 
-        if (socketSession != null && socketSession.isOpen())
-            messageService.sendAllMemberMessage(session,message);
-
+        redisPublisher.publish(roomRepository.getTopic(roomId),message);
     }
 
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+    @MessageMapping(value = "/enter/wait")
+    public void wait(@AuthenticationPrincipal Principal principal){
+        MessageDTO messageDTO = new MessageDTO();
+        String roomId = "";
 
-        sessions.remove(session.getId());
+        Room waitRoom = roomService.findRoomById("waitRoom")
+                .map(room -> room.addUser(principal))
+                .orElseThrow();
+        
 
-        messageService.sendAllMemberMessage(session,new TextMessage("out"));
+        log.info(waitRoom.getPrincipals().toString());
 
-        super.afterConnectionClosed(session, status);
+        if (waitRoom.getPrincipals().size() >= 2)
+           roomId = roomService.createChatRoom(waitRoom);
+
+        messageDTO.setRoomId(roomId);
+        messageDTO.setMessage("createRoom");
+
+        redisPublisher.publish(roomRepository.getTopic("waitRoom"),messageDTO);
     }
+
+//    @MessageMapping(value = "/chat/message")
+//    public void message(MessageDTO message){
+//        template.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+//    }
+
+//    @MessageMapping(value = "/chat/out")
+//    public void out(MessageDTO message, @AuthenticationPrincipal Principal principal) {
+//        message.setMessage(principal.getName() + "님이 채팅방을 나갔습니다");
+//        template.convertAndSend("/sub/chat/room/" + message.getRoomId(),message);
+//    }
+
 }

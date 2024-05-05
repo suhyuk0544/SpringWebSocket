@@ -15,6 +15,9 @@ import org.springframework.core.serializer.Serializer;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.*;
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
@@ -31,28 +34,35 @@ public class RedisConfiguration {
 //    private Integer port;
 
     @Bean
-    public RedisConnectionFactory redisConnectionFactory(){
-
-        //        System.out.println(host);;
-
-//        return new LettuceConnectionFactory(host,port);
-        return new LettuceConnectionFactory("localhost",6379);
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory, MessageListenerAdapter listenerAdapter, ChannelTopic channelTopic) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+        container.addMessageListener(listenerAdapter, channelTopic);
+        return container;
     }
 
     @Bean
-    public RedisTemplate<String,Object> redisTemplate(){
+    public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "onMessage");
+    }
 
-        RedisTemplate<String,Object> redisTemplate = new RedisTemplate<>();
-
-        redisTemplate.setConnectionFactory(redisConnectionFactory());
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer(""));
-//        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-//        redisTemplate.setHashValueSerializer(new );
-
-
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
         return redisTemplate;
     }
 
+    @Bean
+    public ChannelTopic channelTopic() {
+        return new ChannelTopic("chatroom");
+    }
 
+//    @Bean
+//    public RedisConnectionFactory redisConnectionFactory() {
+//        return new LettuceConnectionFactory(host,port);
+//        return new LettuceConnectionFactory("localhost", 6379);
+//    }
 }
