@@ -1,7 +1,9 @@
 package xyz.suhyuk0544.springwebsocket.WebSocket.Controller;
 
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import xyz.suhyuk0544.springwebsocket.Redis.Room.Room;
 import xyz.suhyuk0544.springwebsocket.Redis.Room.RoomRepository;
+import xyz.suhyuk0544.springwebsocket.WebSocket.Dto.MessageDTO;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -31,6 +34,25 @@ public class WebSocketController {
 //
 //        return ResponseEntity.ok(rooms.toString());
 //    }
+
+
+    @ResponseBody
+    @GetMapping("/helloString")
+    public String api(@RequestParam("name")String name) {
+        return "hello" + name;
+    }
+
+    @ResponseBody
+    @GetMapping("/hello-api")
+    public String helloApi(@RequestParam("name")String name, @RequestParam("age")Integer age,@RequestParam("gender")String gender) {
+
+        JSONObject jsonObject = new JSONObject()
+                .put("name",name)
+                .put("age",age)
+                .put("gender",gender);
+
+        return jsonObject.toString();
+    }
 
     @GetMapping(value = "/room/{id}")
     public ResponseEntity<String> searchRoom(@PathVariable String id) {
